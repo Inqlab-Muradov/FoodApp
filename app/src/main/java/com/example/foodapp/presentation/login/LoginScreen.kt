@@ -1,7 +1,21 @@
 package com.example.foodapp.presentation.login
 
+import android.nfc.Tag
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,25 +25,45 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,9 +72,32 @@ import com.example.foodapp.R
 @Preview(showBackground = true)
 @Composable
 fun LoginScreen(modifier: Modifier = Modifier) {
+
+    var screenState by remember { mutableStateOf(ScreenState.LOGIN) }
+
+    val animatableLoginButtonContainerColor by animateColorAsState(
+        targetValue = if (screenState == ScreenState.LOGIN) Color.White else Color(0xFFFE912D),
+        animationSpec = tween(durationMillis = 600)
+    )
+
+    val animatableLoginButtonContentColor by animateColorAsState(
+        targetValue = if (screenState == ScreenState.LOGIN) Color(0xFFFE912D) else Color.White,
+        animationSpec = tween(durationMillis = 600)
+    )
+    val animatableRegisterButtonContainerColor by animateColorAsState(
+        targetValue = if (screenState == ScreenState.REGISTER) Color.White else Color(0xFFFE912D),
+        animationSpec = tween(durationMillis = 600)
+    )
+    val animatableRegisterButtonContentColor by animateColorAsState(
+        targetValue = if (screenState == ScreenState.REGISTER) Color(0xFFFE912D) else Color.White,
+        animationSpec = tween(durationMillis = 600)
+    )
+
+
     Scaffold { innerPadding ->
         Column(
             modifier
+                .imePadding()
                 .fillMaxSize()
                 .background(color = Color.White)
         ) {
@@ -81,29 +138,41 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                         .offset(y = 16.dp)
                 ) {
                     Card(
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
+                            screenState = ScreenState.LOGIN
+                        },
                         elevation = CardDefaults.cardElevation(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        colors = CardDefaults.cardColors(containerColor = animatableLoginButtonContainerColor),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Text(
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp),
                             text = "Login",
                             fontSize = 16.sp,
-                            color = Color(0xFFFE912D),
+                            color = animatableLoginButtonContentColor,
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Card(
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = null
+                        ) {
+                            screenState = ScreenState.REGISTER
+                        },
                         elevation = CardDefaults.cardElevation(8.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFE912D) ),
+                        colors = CardDefaults.cardColors(containerColor = animatableRegisterButtonContainerColor),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Text(
                             modifier = Modifier.padding(vertical = 8.dp, horizontal = 24.dp),
                             text = "Register",
                             fontSize = 16.sp,
-                            color = Color.White,
+                            color = animatableRegisterButtonContentColor,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -111,9 +180,12 @@ fun LoginScreen(modifier: Modifier = Modifier) {
             }
             Spacer(modifier = Modifier.height(32.dp))
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
-            ){
+            ) {
                 Text(
                     text = "or",
                     fontSize = 16.sp,
@@ -122,14 +194,16 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(24.dp)
-                ){
+                ) {
                     Card(
                         elevation = CardDefaults.cardElevation(8.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F0F1)),
                         shape = CircleShape
-                    ){
+                    ) {
                         Icon(
-                            modifier = Modifier.padding(8.dp).size(16.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(16.dp),
                             painter = painterResource(R.drawable.google_icon),
                             contentDescription = null,
                             tint = Color(0xFF1AA1F0)
@@ -139,9 +213,11 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                         elevation = CardDefaults.cardElevation(8.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F0F1)),
                         shape = CircleShape
-                    ){
+                    ) {
                         Icon(
-                            modifier = Modifier.padding(8.dp).size(16.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(16.dp),
                             painter = painterResource(R.drawable.twitter_icon),
                             contentDescription = null,
                             tint = Color(0xFF1AA1F0)
@@ -151,16 +227,207 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                         elevation = CardDefaults.cardElevation(8.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F0F1)),
                         shape = CircleShape
-                    ){
+                    ) {
                         Icon(
-                            modifier = Modifier.padding(8.dp).size(16.dp),
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(16.dp),
                             painter = painterResource(R.drawable.facebook_icon),
                             contentDescription = null,
                             tint = Color(0xFF1AA1F0)
                         )
                     }
                 }
+                Spacer(modifier = Modifier.height(48.dp))
+                Crossfade(
+                    targetState = screenState
+                ) { target ->
+                    if (target == ScreenState.LOGIN) LoginContent() else RegisterContent()
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .padding(vertical = 24.dp)
+                        .fillMaxWidth(),
+                    onClick = {},
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFE912D)
+                    ),
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        text = "Continue",
+                        fontSize = 14.sp,
+                        color = Color.White
+                    )
+                }
             }
         }
     }
+}
+
+@Composable
+fun LoginContent(modifier: Modifier = Modifier) {
+    var userName by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = userName,
+            onValueChanged = { newText ->
+                userName = newText
+            },
+            placeHolder = "Username"
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = password,
+            onValueChanged = { newText ->
+                password = newText
+            },
+            placeHolder = "Password",
+            isPassportField = true
+        )
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                ) {
+                    append("Don't have an account?")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = 14.sp,
+                        color = Color(0xFFFE912D)
+                    )
+                ) {
+                    append(" Sign Up")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun RegisterContent(modifier: Modifier = Modifier) {
+    var userNameRegister by remember { mutableStateOf("") }
+    var passwordRegister by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = userNameRegister,
+            onValueChanged = { newText ->
+                userNameRegister = newText
+            },
+            placeHolder = "Enter username"
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth(),
+            text = passwordRegister,
+            onValueChanged = { newText ->
+                passwordRegister = newText
+            },
+            placeHolder = "Enter password",
+            isPassportField = true
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            text = confirmPassword,
+            onValueChanged = { newValue ->
+                confirmPassword = newValue
+            },
+            placeHolder = "Confirm Password",
+            isPassportField = true
+        )
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                ) {
+                    append("Already have an account?")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = 14.sp,
+                        color = Color(0xFFFE912D)
+                    )
+                ) {
+                    append(" Sign In")
+                }
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun TextField(
+    modifier: Modifier = Modifier,
+    text: String,
+    onValueChanged: (String) -> Unit,
+    placeHolder: String,
+    isPassportField: Boolean = false
+) {
+    var onFocus by remember { mutableStateOf(false) }
+    val animatableBorderColor by animateColorAsState(
+        targetValue = if (onFocus) Color(0xFFFE912D) else Color(0xFFBDBDBD),
+        animationSpec = tween(durationMillis = 600)
+    )
+    BasicTextField(
+        modifier = modifier
+            .onFocusChanged { focusState ->
+                onFocus = focusState.isFocused
+            }
+            .wrapContentHeight()
+            .border(1.dp, color = animatableBorderColor, shape = RoundedCornerShape(12.dp)),
+        value = text,
+        onValueChange = onValueChanged,
+        cursorBrush = SolidColor(Color(0xFFFE912D)),
+        textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 16.dp, horizontal = 8.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                if (text.isEmpty()) {
+                    Text(
+                        text = placeHolder,
+                        style = TextStyle(color = Color.Gray, fontSize = 14.sp)
+                    )
+                }
+                innerTextField()
+            }
+        },
+        singleLine = true,
+        maxLines = 1,
+        visualTransformation = if (isPassportField) PasswordVisualTransformation() else VisualTransformation.None
+    )
+
+}
+
+enum class ScreenState {
+    LOGIN, REGISTER
 }
