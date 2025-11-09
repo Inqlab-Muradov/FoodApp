@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -60,6 +61,7 @@ fun SplashScreen(
         Image(
             painter = painterResource(R.drawable.pizza),
             contentDescription = null,
+            colorFilter = ColorFilter.tint(color = Color(0xFFCBF482)),
             modifier = Modifier
                 .size(112.dp)
                 .offset(y = offsetY)

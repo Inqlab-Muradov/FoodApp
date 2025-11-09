@@ -2,9 +2,13 @@ package com.example.foodapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.foodapp.presentation.home.HomeScreen
+import com.example.foodapp.presentation.home.HomeViewModel
 import com.example.foodapp.presentation.login.LoginScreen
 import com.example.foodapp.presentation.splash.SplashScreen
 import kotlinx.serialization.Serializable
@@ -16,7 +20,7 @@ fun MainNavHost(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = ScreenRoutes.SplashScreen,
+        startDestination = ScreenRoutes.HomeScreen,
     ) {
         composable<ScreenRoutes.SplashScreen> {
             SplashScreen(
@@ -26,7 +30,16 @@ fun MainNavHost(modifier: Modifier = Modifier) {
             )
         }
         composable<ScreenRoutes.LoginScreen> {
-            LoginScreen()
+            LoginScreen(
+                navigateToHome = {
+                    navController.navigate(ScreenRoutes.HomeScreen)
+                }
+            )
+        }
+
+        composable<ScreenRoutes.HomeScreen> {
+            val homeViewModel: HomeViewModel = hiltViewModel()
+            HomeScreen()
         }
     }
 
@@ -40,4 +53,7 @@ sealed class ScreenRoutes {
 
     @Serializable
     data object LoginScreen : ScreenRoutes()
+
+    @Serializable
+    data object HomeScreen : ScreenRoutes()
 }

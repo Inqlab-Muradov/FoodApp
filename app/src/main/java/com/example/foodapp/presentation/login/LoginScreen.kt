@@ -1,17 +1,8 @@
 package com.example.foodapp.presentation.login
 
-import android.nfc.Tag
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -64,32 +57,31 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.foodapp.R
 
-@Preview(showBackground = true)
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(modifier: Modifier = Modifier, navigateToHome: () -> Unit) {
 
     var screenState by remember { mutableStateOf(ScreenState.LOGIN) }
 
     val animatableLoginButtonContainerColor by animateColorAsState(
-        targetValue = if (screenState == ScreenState.LOGIN) Color.White else Color(0xFFFE912D),
+        targetValue = if (screenState == ScreenState.LOGIN) Color.White else Color(0xFFCBF482),
         animationSpec = tween(durationMillis = 600)
     )
 
     val animatableLoginButtonContentColor by animateColorAsState(
-        targetValue = if (screenState == ScreenState.LOGIN) Color(0xFFFE912D) else Color.White,
+        targetValue = if (screenState == ScreenState.LOGIN) Color(0xFFCBF482) else Color.White,
         animationSpec = tween(durationMillis = 600)
     )
     val animatableRegisterButtonContainerColor by animateColorAsState(
-        targetValue = if (screenState == ScreenState.REGISTER) Color.White else Color(0xFFFE912D),
+        targetValue = if (screenState == ScreenState.REGISTER) Color.White else Color(0xFFCBF482),
         animationSpec = tween(durationMillis = 600)
     )
     val animatableRegisterButtonContentColor by animateColorAsState(
-        targetValue = if (screenState == ScreenState.REGISTER) Color(0xFFFE912D) else Color.White,
+        targetValue = if (screenState == ScreenState.REGISTER) Color(0xFFCBF482) else Color.White,
         animationSpec = tween(durationMillis = 600)
     )
 
@@ -104,7 +96,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
             Box(
                 modifier
                     .background(
-                        color = Color(0xFFFE912D),
+                        color = Color(0xFFCBF482),
                         shape = RoundedCornerShape(bottomEnd = 32.dp, bottomStart = 32.dp)
                     )
                     .fillMaxWidth()
@@ -206,7 +198,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                                 .size(16.dp),
                             painter = painterResource(R.drawable.google_icon),
                             contentDescription = null,
-                            tint = Color(0xFF1AA1F0)
+                            tint = Color(0xFFCBF482)
                         )
                     }
                     Card(
@@ -220,7 +212,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                                 .size(16.dp),
                             painter = painterResource(R.drawable.twitter_icon),
                             contentDescription = null,
-                            tint = Color(0xFF1AA1F0)
+                            tint = Color(0xFFCBF482)
                         )
                     }
                     Card(
@@ -234,7 +226,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                                 .size(16.dp),
                             painter = painterResource(R.drawable.facebook_icon),
                             contentDescription = null,
-                            tint = Color(0xFF1AA1F0)
+                            tint = Color(0xFFCBF482)
                         )
                     }
                 }
@@ -250,10 +242,10 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                         .navigationBarsPadding()
                         .padding(vertical = 24.dp)
                         .fillMaxWidth(),
-                    onClick = {},
+                    onClick = navigateToHome,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFE912D)
+                        containerColor = Color(0xFFCBF482)
                     ),
                 ) {
                     Text(
@@ -273,7 +265,7 @@ fun LoginContent(modifier: Modifier = Modifier) {
     var userName by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TextField(
+        CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
             text = userName,
@@ -283,7 +275,7 @@ fun LoginContent(modifier: Modifier = Modifier) {
             placeHolder = "Username"
         )
         Spacer(modifier = Modifier.height(24.dp))
-        TextField(
+        CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
             text = password,
@@ -309,7 +301,8 @@ fun LoginContent(modifier: Modifier = Modifier) {
                 withStyle(
                     style = SpanStyle(
                         fontSize = 14.sp,
-                        color = Color(0xFFFE912D)
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFCBF482)
                     )
                 ) {
                     append(" Sign Up")
@@ -325,7 +318,7 @@ fun RegisterContent(modifier: Modifier = Modifier) {
     var passwordRegister by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TextField(
+        CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
             text = userNameRegister,
@@ -335,7 +328,7 @@ fun RegisterContent(modifier: Modifier = Modifier) {
             placeHolder = "Enter username"
         )
         Spacer(modifier = Modifier.height(24.dp))
-        TextField(
+        CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
             text = passwordRegister,
@@ -346,7 +339,7 @@ fun RegisterContent(modifier: Modifier = Modifier) {
             isPassportField = true
         )
         Spacer(modifier = Modifier.height(24.dp))
-        TextField(
+        CustomTextField(
             modifier = Modifier.fillMaxWidth(),
             text = confirmPassword,
             onValueChanged = { newValue ->
@@ -371,7 +364,8 @@ fun RegisterContent(modifier: Modifier = Modifier) {
                 withStyle(
                     style = SpanStyle(
                         fontSize = 14.sp,
-                        color = Color(0xFFFE912D)
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFCBF482)
                     )
                 ) {
                     append(" Sign In")
@@ -383,20 +377,24 @@ fun RegisterContent(modifier: Modifier = Modifier) {
 
 
 @Composable
-private fun TextField(
+fun CustomTextField(
     modifier: Modifier = Modifier,
     text: String,
     onValueChanged: (String) -> Unit,
     placeHolder: String,
-    isPassportField: Boolean = false
+    isPassportField: Boolean = false,
+    fontSize: TextUnit = 14.sp,
+    enabled: Boolean = true,
+    focusRequester: FocusRequester = FocusRequester()
 ) {
     var onFocus by remember { mutableStateOf(false) }
     val animatableBorderColor by animateColorAsState(
-        targetValue = if (onFocus) Color(0xFFFE912D) else Color(0xFFBDBDBD),
+        targetValue = if (onFocus) Color(0xFFCBF482) else Color(0xFFBDBDBD),
         animationSpec = tween(durationMillis = 600)
     )
     BasicTextField(
         modifier = modifier
+            .focusRequester(focusRequester)
             .onFocusChanged { focusState ->
                 onFocus = focusState.isFocused
             }
@@ -404,8 +402,8 @@ private fun TextField(
             .border(1.dp, color = animatableBorderColor, shape = RoundedCornerShape(12.dp)),
         value = text,
         onValueChange = onValueChanged,
-        cursorBrush = SolidColor(Color(0xFFFE912D)),
-        textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+        cursorBrush = SolidColor(Color(0xFFCBF482)),
+        textStyle = TextStyle(color = Color.Black, fontSize = fontSize),
         decorationBox = { innerTextField ->
             Box(
                 modifier = Modifier
@@ -415,12 +413,13 @@ private fun TextField(
                 if (text.isEmpty()) {
                     Text(
                         text = placeHolder,
-                        style = TextStyle(color = Color.Gray, fontSize = 14.sp)
+                        style = TextStyle(color = Color.Gray, fontSize = fontSize)
                     )
                 }
                 innerTextField()
             }
         },
+        enabled = enabled,
         singleLine = true,
         maxLines = 1,
         visualTransformation = if (isPassportField) PasswordVisualTransformation() else VisualTransformation.None
