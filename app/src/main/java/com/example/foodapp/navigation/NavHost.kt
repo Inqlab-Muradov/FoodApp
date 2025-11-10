@@ -1,8 +1,10 @@
 package com.example.foodapp.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -39,7 +41,13 @@ fun MainNavHost(modifier: Modifier = Modifier) {
 
         composable<ScreenRoutes.HomeScreen> {
             val homeViewModel: HomeViewModel = hiltViewModel()
-            HomeScreen()
+            val uiState by homeViewModel.homeState.collectAsStateWithLifecycle()
+            HomeScreen(
+                state = uiState,
+                onTextChanged = homeViewModel::setFoodText,
+                onCalculate = homeViewModel::getCalorie,
+                closeSnackBar = homeViewModel::closeSnackBar
+            )
         }
     }
 

@@ -1,8 +1,12 @@
 package com.example.foodapp.presentation.home
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -40,11 +44,14 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -68,6 +75,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -75,75 +83,115 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.foodapp.R
 import com.example.foodapp.presentation.login.CustomTextField
+import kotlinx.coroutines.delay
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    state: HomeState,
+    onTextChanged: (String, Int) -> Unit,
+    onCalculate: () -> Unit,
+    closeSnackBar:()->Unit
+) {
+    val snackHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.isEmptyMessage) {
+        if(state.isEmptyMessage){
+            snackHostState.showSnackbar("Food not found. Check the spelling and try again.")
+        }
+    }
+
+    LaunchedEffect(snackHostState.currentSnackbarData) {
+        if (snackHostState.currentSnackbarData != null) {
+            delay(2000)
+            closeSnackBar()
+        }
+    }
+
     Scaffold(
-        modifier = Modifier.imePadding(),
+        modifier = modifier.imePadding(),
         containerColor = Color(0xFFF6F6F6),
+        snackbarHost = {
+            SnackbarHost(hostState = snackHostState)
+        },
         content = { innerPadding ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(innerPadding)
                     .padding(horizontal = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(
+                    Row(
                         modifier = Modifier
-                            .size(32.dp)
-                            .border(
-                                color = Color(0xFFCBF482),
-                                shape = CircleShape,
-                                width = 1.dp
+                            .statusBarsPadding()
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .border(
+                                    color = Color(0xFFCBF482),
+                                    shape = CircleShape,
+                                    width = 1.dp
+                                )
+                                .padding(8.dp),
+                            painter = painterResource(R.drawable.user),
+                            contentDescription = null,
+                            tint = Color(0xFFCBF482)
+                        )
+                        Column(
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        ) {
+                            Text(
+                                text = "Today 2 November"
                             )
-                            .padding(8.dp),
-                        painter = painterResource(R.drawable.user),
-                        contentDescription = null,
-                        tint = Color(0xFFCBF482)
-                    )
-                    Column(
-                        modifier = Modifier.padding(horizontal = 8.dp)
+                            Text(
+                                text = "Welcome Muradov Inqlab",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    CalorieBox(state = state)
+                    Spacer(modifier = Modifier.height(24.dp))
+                    FoodItem.entries.forEachIndexed { index, foodItem ->
+                        FoodItem(
+                            foodItem = foodItem,
+                            index = index,
+                            state = state,
+                            onTextChanged = onTextChanged
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = onCalculate,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp, vertical = 12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCBF482))
                     ) {
                         Text(
-                            text = "Today 2 November"
-                        )
-                        Text(
-                            text = "Welcome Muradov Inqlab",
+                            text = "Calculate",
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
+                            color = Color.Black,
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
                 }
-                CalorieBox()
-                Spacer(modifier = Modifier.height(24.dp))
-                FoodItem.entries.forEachIndexed { index, foodItem ->
-                    FoodItem(foodItem = foodItem, index = index)
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Button(
-                    onClick = {},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCBF482))
-                ) {
-                    Text(
-                        text = "Calculate",
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(vertical = 4.dp)
+                if (state.loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(alignment = Alignment.Center),
+                        trackColor = Color(0xFFCBF482),
+                        color = Color.White
                     )
                 }
             }
@@ -151,9 +199,8 @@ fun HomeScreen(modifier: Modifier = Modifier) {
     )
 }
 
-@Preview(showBackground = true)
 @Composable
-fun CalorieBox(modifier: Modifier = Modifier) {
+fun CalorieBox(modifier: Modifier = Modifier, state: HomeState) {
     Column(
         modifier
             .fillMaxWidth()
@@ -184,15 +231,19 @@ fun CalorieBox(modifier: Modifier = Modifier) {
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
+                    val text = AnimatedPercentage(
+                        state.initialCaloriePercentage ?: 0.0f,
+                        isPercentage = true
+                    )
                     Text(
-                        text = "62.5%",
+                        text = "$text%",
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )
                 }
                 Box() {
-                    CircularSlider()
+                    CircularSlider(state = state)
                 }
             }
             Row(
@@ -202,8 +253,8 @@ fun CalorieBox(modifier: Modifier = Modifier) {
                     .padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                repeat(3) {
-                    CalorieItem()
+                state.calorieItemList.forEach {
+                    CalorieItem(calorieItemData = it)
                 }
             }
         }
@@ -211,44 +262,56 @@ fun CalorieBox(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun CalorieItem(modifier: Modifier = Modifier) {
+fun CalorieItem(modifier: Modifier = Modifier, calorieItemData: CalorieItemData) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = "Carbs",
+            text = calorieItemData.title,
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
-        SliderTest()
+        SliderTest(calorieItemData = calorieItemData)
+        val text = AnimatedPercentage(targetPercentage = calorieItemData.amount.toFloat())
         Text(
-            text = "250/256 g"
+            text = "$text/256 g",
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = Color.Black
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SliderTest(modifier: Modifier = Modifier) {
-    var sliderPosition by remember { mutableFloatStateOf(0f) }
+fun SliderTest(modifier: Modifier = Modifier, calorieItemData: CalorieItemData) {
     var isProgress by remember { mutableStateOf(false) }
     val thumbSize = animateDpAsState(
         targetValue = if (isProgress) 24.dp else 36.dp,
         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
     )
+
+    val percentage = calorieItemData.percentage
+    val value by animateFloatAsState(
+        targetValue = percentage ?: 0.0f,
+        animationSpec = tween(
+            durationMillis = 1000,
+            easing = FastOutSlowInEasing
+        )
+    )
+
     Slider(
         modifier = Modifier
             .width(80.dp)
             .height(8.dp),
-        value = sliderPosition,
+        value = value,
         onValueChange = {
-            sliderPosition = it
             isProgress = true
         },
         colors = SliderDefaults.colors(
-            activeTrackColor = Color(0xFF9ECF28),
+            activeTrackColor = calorieItemData.progressColor,
             inactiveTrackColor = Color.White,
         ),
         onValueChangeFinished = {
@@ -274,22 +337,31 @@ fun SliderTest(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(sliderState.value)
-                        .background(Color(0xFF9ECF28))
+                        .background(calorieItemData.progressColor)
                 )
             }
         }
     )
 }
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun CircularSlider(
     modifier: Modifier = Modifier,
     size: Dp = 100.dp,
     strokeWidth: Dp = 12.dp,
     innerPadding: Dp = 12.dp,
-    initialValue: Float = 0.00f,
+    state: HomeState
 ) {
-    var angle by remember { mutableStateOf(270 * initialValue) }
+    val targetAngle = 270f * (state.initialCaloriePercentage ?: 0f)
+
+    val animatedAngle by animateFloatAsState(
+        targetValue = targetAngle,
+        animationSpec = tween(
+            durationMillis = 1000,
+            easing = FastOutSlowInEasing
+        )
+    )
 
     Box(
         modifier = modifier.size(size),
@@ -311,7 +383,7 @@ fun CircularSlider(
             drawArc(
                 color = Color(0xFF9ECF28),
                 startAngle = 135f,
-                sweepAngle = angle,
+                sweepAngle = animatedAngle,
                 useCenter = false,
                 style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
             )
@@ -331,42 +403,50 @@ fun CircularSlider(
                     shape = CircleShape
                 )
         ) {
-            Text(
+            Column(
                 modifier = Modifier.align(Alignment.Center),
-                text = "100 cal"
-            )
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val text = AnimatedPercentage(targetPercentage = state.calorie?.toFloat() ?: 0.0f)
+                Text(
+                    text = text,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "cal",
+                )
+            }
         }
     }
 }
 
 
 @Composable
-fun FoodItem(modifier: Modifier = Modifier, foodItem: FoodItem, index: Int) {
-    var breakfastValue by remember { mutableStateOf("") }
-    var lunchValue by remember { mutableStateOf("") }
-    var saladValue by remember { mutableStateOf("") }
-    var dinnerValue by remember { mutableStateOf("") }
+fun FoodItem(
+    modifier: Modifier = Modifier,
+    foodItem: FoodItem,
+    index: Int,
+    state: HomeState,
+    onTextChanged: (String, Int) -> Unit
+) {
+
+    fun getFoodText(index: Int): String {
+        state.apply {
+            return when (index) {
+                0 -> breakfastValue
+                1 -> lunchValue
+                2 -> saladValue
+                3 -> dinnerValue
+                else -> ""
+            }
+        }
+    }
 
     var enable by remember { mutableStateOf(true) }
     var isFocus by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-
-    val text = when (index) {
-        0 -> breakfastValue
-        1 -> lunchValue
-        2 -> saladValue
-        3 -> dinnerValue
-        else -> ""
-    }
-
-    fun onValueChanged(value: String) {
-        when (index) {
-            0 -> breakfastValue = value
-            1 -> lunchValue = value
-            2 -> saladValue = value
-            3 -> dinnerValue = value
-        }
-    }
 
     fun onAddClick() {
         enable = !enable
@@ -415,9 +495,9 @@ fun FoodItem(modifier: Modifier = Modifier, foodItem: FoodItem, index: Int) {
                         .weight(1f)
                         .height(64.dp)
                         .padding(vertical = 8.dp),
-                    text = text,
+                    text = getFoodText(index),
                     onValueChanged = { newValue ->
-                        onValueChanged(newValue)
+                        onTextChanged(newValue, index)
                     },
                     placeHolder = "Add ${foodItem.tittle}",
                     fontSize = 12.sp,
@@ -446,13 +526,30 @@ fun FoodItem(modifier: Modifier = Modifier, foodItem: FoodItem, index: Int) {
     }
 }
 
-enum class FoodItem(val icon: Int, val tittle: String, val description: String) {
+enum class FoodItem(val icon: Int, val tittle: String) {
     BREAKFAST(
         icon = R.drawable.breakfast,
         tittle = "Breakfast",
-        description = "Recommended 830-1000 cal"
     ),
-    LUNCH(icon = R.drawable.lunch, tittle = "Lunch", description = "Recommended 830-1000 cal"),
-    SALAD(icon = R.drawable.salad, tittle = "Salad", description = "Recommended 830-1000 cal"),
-    DINNER(icon = R.drawable.dinner, tittle = "Dinner", description = "Recommended 830-1000 cal");
+    LUNCH(icon = R.drawable.lunch, tittle = "Lunch"),
+    SALAD(icon = R.drawable.salad, tittle = "Salad"),
+    DINNER(icon = R.drawable.dinner, tittle = "Dinner");
+}
+
+@Composable
+fun AnimatedPercentage(
+    targetPercentage: Float,
+    isPercentage: Boolean = false
+): String {
+
+    val animatedValue by animateFloatAsState(
+        targetValue = if (isPercentage) targetPercentage * 100 else targetPercentage,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = LinearOutSlowInEasing
+        )
+    )
+
+    return String.format("%.1f", animatedValue)
+
 }
