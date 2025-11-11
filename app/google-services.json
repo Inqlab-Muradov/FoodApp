@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1021658759559",
+    "project_id": "caloriecalculator-a822c",
+    "storage_bucket": "caloriecalculator-a822c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021658759559:android:819945abecf357868d1322",
+        "android_client_info": {
+          "package_name": "com.example.foodapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEylPQVvkbDKSudInuqV6JxOqlKcAPvfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

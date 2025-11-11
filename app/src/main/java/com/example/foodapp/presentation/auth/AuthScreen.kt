@@ -1,4 +1,4 @@
-package com.example.foodapp.presentation.login
+package com.example.foodapp.presentation.auth
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -63,7 +63,13 @@ import androidx.compose.ui.unit.sp
 import com.example.foodapp.R
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, navigateToHome: () -> Unit) {
+fun AuthScreen(
+    modifier: Modifier = Modifier,
+    state: AuthState,
+    setNewText: (String, String) -> Unit,
+    login: () -> Unit,
+    register: () -> Unit
+) {
 
     var screenState by remember { mutableStateOf(ScreenState.LOGIN) }
 
@@ -234,7 +240,19 @@ fun LoginScreen(modifier: Modifier = Modifier, navigateToHome: () -> Unit) {
                 Crossfade(
                     targetState = screenState
                 ) { target ->
-                    if (target == ScreenState.LOGIN) LoginContent() else RegisterContent()
+                    if (target == ScreenState.LOGIN) LoginContent(
+                        state = state,
+                        setNewText = setNewText,
+                        changeScreenState = {
+                            screenState = ScreenState.REGISTER
+                        }
+                    ) else RegisterContent(
+                        state = state,
+                        setNewText = setNewText,
+                        changeScreenState = {
+                            screenState = ScreenState.LOGIN
+                        }
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Button(
@@ -242,7 +260,7 @@ fun LoginScreen(modifier: Modifier = Modifier, navigateToHome: () -> Unit) {
                         .navigationBarsPadding()
                         .padding(vertical = 24.dp)
                         .fillMaxWidth(),
-                    onClick = navigateToHome,
+                    onClick = if (screenState == ScreenState.LOGIN) login else register,
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFCBF482)
@@ -261,16 +279,20 @@ fun LoginScreen(modifier: Modifier = Modifier, navigateToHome: () -> Unit) {
 }
 
 @Composable
-fun LoginContent(modifier: Modifier = Modifier) {
-    var userName by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun LoginContent(
+    modifier: Modifier = Modifier,
+    setNewText: (String, String) -> Unit,
+    state: AuthState,
+    changeScreenState:()->Unit
+) {
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = userName,
+            text = state.usernameLogin,
             onValueChanged = { newText ->
-                userName = newText
+                setNewText("userNameLogin", newText)
             },
             placeHolder = "Username"
         )
@@ -278,9 +300,9 @@ fun LoginContent(modifier: Modifier = Modifier) {
         CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = password,
+            text = state.passwordLogin,
             onValueChanged = { newText ->
-                password = newText
+                setNewText("passwordLogin", newText)
             },
             placeHolder = "Password",
             isPassportField = true
@@ -289,6 +311,12 @@ fun LoginContent(modifier: Modifier = Modifier) {
             modifier = Modifier.height(12.dp)
         )
         Text(
+            modifier = Modifier.clickable(
+                indication = null,
+                interactionSource = null
+            ){
+                changeScreenState()
+            },
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
@@ -313,17 +341,19 @@ fun LoginContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun RegisterContent(modifier: Modifier = Modifier) {
-    var userNameRegister by remember { mutableStateOf("") }
-    var passwordRegister by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
+fun RegisterContent(
+    modifier: Modifier = Modifier,
+    state: AuthState,
+    setNewText: (String, String) -> Unit,
+    changeScreenState: () -> Unit
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = userNameRegister,
+            text = state.usernameRegister,
             onValueChanged = { newText ->
-                userNameRegister = newText
+                setNewText("userNameRegister", newText)
             },
             placeHolder = "Enter username"
         )
@@ -331,9 +361,9 @@ fun RegisterContent(modifier: Modifier = Modifier) {
         CustomTextField(
             modifier = Modifier
                 .fillMaxWidth(),
-            text = passwordRegister,
+            text = state.passwordRegister,
             onValueChanged = { newText ->
-                passwordRegister = newText
+                setNewText("passwordRegister", newText)
             },
             placeHolder = "Enter password",
             isPassportField = true
@@ -341,9 +371,9 @@ fun RegisterContent(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(24.dp))
         CustomTextField(
             modifier = Modifier.fillMaxWidth(),
-            text = confirmPassword,
+            text = state.confirmPasswordRegister,
             onValueChanged = { newValue ->
-                confirmPassword = newValue
+                setNewText("confirmPasswordRegister", newValue)
             },
             placeHolder = "Confirm Password",
             isPassportField = true
@@ -352,6 +382,12 @@ fun RegisterContent(modifier: Modifier = Modifier) {
             modifier = Modifier.height(12.dp)
         )
         Text(
+            modifier = Modifier.clickable(
+                indication = null,
+                interactionSource = null
+            ){
+                changeScreenState()
+            },
             text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(

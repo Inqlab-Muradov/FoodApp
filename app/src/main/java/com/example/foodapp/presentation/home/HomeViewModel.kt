@@ -21,7 +21,7 @@ class HomeViewModel @Inject constructor(
     private val calorieApiService: CalorieApiService
 ) : ViewModel() {
 
-    val _homeState = MutableStateFlow(HomeState())
+    private val _homeState = MutableStateFlow(HomeState())
     val homeState = _homeState.asStateFlow()
 
     fun setFoodText(text: String, index: Int) {
