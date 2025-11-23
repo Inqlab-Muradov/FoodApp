@@ -86,7 +86,12 @@ fun MainNavHost(modifier: Modifier = Modifier) {
                 onTextChanged = homeViewModel::setFoodText,
                 onCalculate = homeViewModel::getCalorie,
                 closeSnackBar = homeViewModel::closeSnackBar,
-                userEmail = userEmail
+                userEmail = userEmail,
+                navigateToLogin = {
+                    navController.navigate(ScreenRoutes.LoginScreen){
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }

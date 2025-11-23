@@ -12,6 +12,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,6 +63,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.packInts
 import com.example.foodapp.R
 import com.example.foodapp.presentation.auth.CustomTextField
 import kotlinx.coroutines.delay
@@ -76,7 +78,8 @@ fun HomeScreen(
     onTextChanged: (String, Int) -> Unit,
     onCalculate: () -> Unit,
     closeSnackBar:()->Unit,
-    userEmail:String
+    userEmail:String,
+    navigateToLogin:()->Unit
 ) {
     val snackHostState = remember { SnackbarHostState() }
 
@@ -143,6 +146,18 @@ fun HomeScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            painter = painterResource(R.drawable.logout),
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp).clickable(
+                                indication = null,
+                                interactionSource = null
+                            ){
+                                navigateToLogin()
+                            },
+                            tint = Color(0xFFCBF482)
+                        )
                     }
                     CalorieBox(state = state)
                     Spacer(modifier = Modifier.height(24.dp))

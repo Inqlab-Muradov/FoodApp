@@ -7,5 +7,4 @@ data class AuthState(
     val passwordRegister: String = "",
     val confirmPasswordRegister: String = "",
     val userEmail: String = ""
-
 )
