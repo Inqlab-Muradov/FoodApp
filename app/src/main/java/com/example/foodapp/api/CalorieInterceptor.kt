@@ -7,7 +7,7 @@ class CalorieInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
         val request = originalRequest.newBuilder()
-            .header("x-api-key", "+ldnu+CBKL3PIUKErU5YyA==u8oceFm2eP0shQIl").build()
+            .header("x-api-key", APIKEY).build()
         val response = chain.proceed(request)
         return response
     }
